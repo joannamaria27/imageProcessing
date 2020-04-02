@@ -3,6 +3,7 @@ using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,52 +24,14 @@ namespace Biometria
         public Histogramy()
         {
             InitializeComponent();
-            {
-                series1 = new SeriesCollection
-                {
-                    new LineSeries
-                    {
-                        Title = "R",
-                        LineSmoothness = 0,
-                        StrokeThickness = 3,                   
-                        //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
-                        //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
-                        Fill = new SolidColorBrush(Colors.Red),
-                        //PointForeground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(69,93,107)),
-                        Values = valR
-                    },
-                    new LineSeries
-                    {
-                        Title = "G",
-                        LineSmoothness = 0,
-                        StrokeThickness = 3,                   
-                        //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
-                        //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
-                        Fill = new SolidColorBrush(Colors.Green),
-                        //PointForeground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(69,93,107)),
-                        Values = valG
-                    },
-                    new LineSeries
-                    {
-                        Title = "B",
-                        LineSmoothness = 0,
-                        StrokeThickness = 3,                   
-                        //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
-                        //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
-                        Fill = new SolidColorBrush(Colors.Blue),
-                        //PointForeground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(69,93,107)),
-                        Values = valB
-                    }
-                };
-                chart1.DataContext = this;
-                GenerateValues();
-            }
         }
 
         public SeriesCollection series1 { get; set; }
+        public SeriesCollection series2 { get; set; }
         ChartValues<double> valR = new ChartValues<double>();
         ChartValues<double> valG = new ChartValues<double>();
         ChartValues<double> valB = new ChartValues<double>();
+        ChartValues<double> valU = new ChartValues<double>();
 
         static Bitmap image;
 
@@ -79,20 +42,19 @@ namespace Biometria
             valR.Clear();
             valG.Clear();
             valB.Clear();
+            valU.Clear();
             int[,] hR = RGBHistogram(image);
             int[,] hG = RGBHistogram(image);
             int[,] hB = RGBHistogram(image);
 
             for (int i = 0; i < 256; i++)
             {
-
                 valR.Add(hR[0, i]);
-                valG.Add(hG[0, i]);
-                valB.Add(hB[0, i]);
+                valG.Add(hG[1, i]);
+                valB.Add(hB[2, i]);
+                valU.Add((hR[0, i] + hG[1, i] + hB[2, i]) / 3);
             }
-
         }
-
         public int[,] RGBHistogram(Bitmap OriginalImage)
         {
             int[,] histogram = new int[3, 256];
@@ -109,16 +71,14 @@ namespace Biometria
                 for (int n = 0; n < OriginalImage.Height; n++)
                 {
                     System.Drawing.Color pixel = OriginalImage.GetPixel(m, n);
-
                     histogram[0, pixel.R]++;
                     histogram[1, pixel.G]++;
                     histogram[2, pixel.B]++;
-
                 }
             }
-
             return histogram;
         }
+
         public int[] Histogram(Bitmap OriginalImage)
         {
             int[] histogram = new int[256];
@@ -136,7 +96,6 @@ namespace Biometria
                     int gs = (int)((pixel.R * 0.3) + (pixel.G * 0.59) + (pixel.B * 0.11));
 
                     histogram[gs]++;
-
                 }
             }
 
@@ -169,19 +128,72 @@ namespace Biometria
                     image.SetPixel(m, n, System.Drawing.Color.FromArgb(255, newgs, newgs, newgs));
                 }
             }
-
             return image;
         }
 
         internal void Show(Bitmap obrazek)
         {
-
             image = obrazek;
-
-
             this.Show();
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            series1 = new SeriesCollection
+                {
+                    new LineSeries
+                    {
+                        Title = "R",
+                       // LineSmoothness = 0,
+                        //StrokeThickness = 3,                   
+                        //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
+                        //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
+                        Stroke = new SolidColorBrush(Colors.Red),
+                        //PointForeground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(69,93,107)),
+                        Values = valR
+                    },
+                    new LineSeries
+                    {
+                        Title = "G",
+                        //LineSmoothness = 0,
+                        //StrokeThickness = 3,                   
+                        //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
+                        //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
+                        Stroke = new SolidColorBrush(Colors.Green),
+                        //PointForeground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(69,93,107)),
+                        Values = valG
+                    },
+                    new LineSeries
+                    {
+                        Title = "B",
+                       // LineSmoothness = 0,
+                        //StrokeThickness = 3,                   
+                        //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
+                        //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
+                        Stroke = new SolidColorBrush(Colors.Blue),
+                        //PointForeground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(69,93,107)),
+                        Values = valB
+                    }
+                };
+            series2 = new SeriesCollection
+                {
+                    new LineSeries
+                    {
+                        Title = "(R+G+B)/3",
+                       // LineSmoothness = 0,
+                        //StrokeThickness = 3,                   
+                        //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
+                        //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
+                        Stroke = new SolidColorBrush(Colors.Purple),
+                        //PointForeground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(69,93,107)),
+                        Values = valU
+                    }
+                };
 
+            chart1.DataContext = this;
+            chart2.DataContext = this;
+            GenerateValues();
+        }
     }
+
 }
