@@ -6,6 +6,7 @@
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:local="clr-namespace:Biometria"
         mc:Ignorable="d"
+        Loaded="Window_Loaded"
         Title="Histogramy" Height="450" Width="800">
     <Grid>
         <DockPanel>
@@ -17,14 +18,28 @@
             </Menu>
         </DockPanel>
 
-        <lvc:CartesianChart x:Name="chart1" Series="{Binding series1}" LegendLocation="Right" >
-            <lvc:CartesianChart.AxisX>
-                <lvc:Axis Title="wartosc" MinValue="0"></lvc:Axis>
-            </lvc:CartesianChart.AxisX>
-            <lvc:CartesianChart.AxisY>
-                <lvc:Axis Title="liczba pixeli" MinValue="0" ></lvc:Axis>
-            </lvc:CartesianChart.AxisY>
-        </lvc:CartesianChart>
+     
+        <StackPanel Margin="10,50,10,200">
+            <lvc:CartesianChart x:Name="chart1" Series="{Binding series1}" LegendLocation="Right" Height="186" >
+                <lvc:CartesianChart.AxisX>
+                    <lvc:Axis Title="wartosc" MinValue="1"></lvc:Axis>
+                </lvc:CartesianChart.AxisX>
+                <lvc:CartesianChart.AxisY>
+                    <lvc:Axis Title="liczba pixeli" MinValue="0" ></lvc:Axis>
+                </lvc:CartesianChart.AxisY>
+            </lvc:CartesianChart>
+        </StackPanel>
+        <StackPanel Margin="10,250,10,10">
+            <lvc:CartesianChart x:Name="chart2" Series="{Binding series2}" LegendLocation="Right" Height="172" >
+                <lvc:CartesianChart.AxisX>
+                    <lvc:Axis Title="wartosc" MinValue="1"></lvc:Axis>
+                </lvc:CartesianChart.AxisX>
+                <lvc:CartesianChart.AxisY>
+                    <lvc:Axis Title="liczba pixeli" MinValue="0" ></lvc:Axis>
+                </lvc:CartesianChart.AxisY>
+            </lvc:CartesianChart>
+        </StackPanel>
+
 
         <!--<StackPanel Margin="100,50,595,300" Width="300" >
             <Image Source="Image\ImagePNG.png" Name="obrazek" Height="auto"  Width="auto"/>

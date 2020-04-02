@@ -258,6 +258,7 @@ namespace Biometria
                 target.WritePixels(new Int32Rect(x, y, 1, 1), ColorData, 4, 0);
             obrazek.Source = target;
         }
+
         private System.Drawing.Bitmap BitmapImage2DBitmap(BitmapImage bitmapImage)
         {
             using (MemoryStream outStream = new MemoryStream())
@@ -271,13 +272,19 @@ namespace Biometria
             }
         }
 
+        public System.Drawing.Bitmap b;
         private void HistogramyWyswietl(object sender, RoutedEventArgs e)
         {
-            BitmapImage source = obrazek.Source as BitmapImage;
-            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
-
-            Histogramy histogramy = new Histogramy();
-            histogramy.Show(b);
+            
+                
+                BitmapImage source = obrazek.Source as BitmapImage;
+                System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+                
+                Histogramy histogramy = new Histogramy();
+                histogramy.Show(b);
+            
+            
+     
         }
     }
 }
