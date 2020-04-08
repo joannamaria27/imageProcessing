@@ -7,20 +7,20 @@
         xmlns:local="clr-namespace:Biometria"
         mc:Ignorable="d"
         Loaded="Window_Loaded"
-        Title="Histogramy" Height="450" Width="800">
+        Title="Histogramy obrazka głównego" Height="480" Width="800">
     <Grid>
         <DockPanel>
             <Menu DockPanel.Dock="Top">
-                <MenuItem Header="_Histogramy">
-                    <MenuItem Header="_rozciągnięcie" />
-                    <MenuItem Header="_wyrównanie"/>
-                </MenuItem>
+                <MenuItem Background="LightGray" Header="_RozciagniecieAB" Click="Rozciagniecie"/>
+                <MenuItem Background="LightGray" Header="_Wyrownanie" Click="Wyrownanie"/>
+                <MenuItem Background="LightGray" Header="_Rozjasnienie" Click="Rozjasnienie"/>
+                <MenuItem Background="LightGray" Header="_Przyciemnienie" Click="Przyciemnienie"/>
             </Menu>
         </DockPanel>
 
      
         <StackPanel Margin="10,50,10,200">
-            <lvc:CartesianChart x:Name="chart1" Series="{Binding series1}" LegendLocation="Right" Height="186" >
+            <lvc:CartesianChart x:Name="chart1" Series="{Binding series1}" LegendLocation="Right" Height="180" >
                 <lvc:CartesianChart.AxisX>
                     <lvc:Axis Title="wartosc" MinValue="1"></lvc:Axis>
                 </lvc:CartesianChart.AxisX>
@@ -30,7 +30,7 @@
             </lvc:CartesianChart>
         </StackPanel>
         <StackPanel Margin="10,250,10,10">
-            <lvc:CartesianChart x:Name="chart2" Series="{Binding series2}" LegendLocation="Right" Height="172" >
+            <lvc:CartesianChart x:Name="chart2" Series="{Binding series2}" LegendLocation="Right" Height="180" >
                 <lvc:CartesianChart.AxisX>
                     <lvc:Axis Title="wartosc" MinValue="1"></lvc:Axis>
                 </lvc:CartesianChart.AxisX>

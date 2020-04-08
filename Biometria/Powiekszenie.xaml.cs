@@ -23,8 +23,9 @@ namespace Biometria
         }
         internal void Show(Image obrazek)
         {
-            obrazek_powiekszenie.Source = obrazek.Source;
-            this.Show();
+                obrazek_powiekszenie.Source = obrazek.Source;
+                this.Show();
+           
 
         }
         private void Zamknij(object sender, MouseButtonEventArgs e)

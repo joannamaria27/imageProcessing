@@ -21,39 +21,50 @@ namespace Biometria
     /// </summary>
     public partial class Histogramy : Window
     {
-        public Histogramy()
+        MainWindow Sender;
+        public Histogramy(object sender)
         {
             InitializeComponent();
+            Sender = (MainWindow)sender;
         }
-
+        internal void Show(Bitmap obrazek)
+        {
+            image2 = obrazek;
+            image = image2;
+            this.Show();
+        }
         public SeriesCollection series1 { get; set; }
         public SeriesCollection series2 { get; set; }
+
         ChartValues<double> valR = new ChartValues<double>();
         ChartValues<double> valG = new ChartValues<double>();
         ChartValues<double> valB = new ChartValues<double>();
         ChartValues<double> valU = new ChartValues<double>();
 
-        static Bitmap image;
+        public Bitmap image2;
+        public Bitmap image;
 
-        void GenerateValues()
+        int[,] h;
+        int[,] d;
+
+        public void GenerateValues()
         {
-            Random rnd = new Random();
+            d = RGBHistogram(image2);
 
             valR.Clear();
             valG.Clear();
             valB.Clear();
             valU.Clear();
-            int[,] hR = RGBHistogram(image);
-            int[,] hG = RGBHistogram(image);
-            int[,] hB = RGBHistogram(image);
+            h = RGBHistogram(image);
 
             for (int i = 0; i < 256; i++)
             {
-                valR.Add(hR[0, i]);
-                valG.Add(hG[1, i]);
-                valB.Add(hB[2, i]);
-                valU.Add((hR[0, i] + hG[1, i] + hB[2, i]) / 3);
+                valR.Add(h[0, i]);
+                valG.Add(h[1, i]);
+                valB.Add(h[2, i]);
+                valU.Add((h[0, i] + h[1, i] + h[2, i]) / 3);
             }
+            image = image2;
         }
         public int[,] RGBHistogram(Bitmap OriginalImage)
         {
@@ -79,63 +90,269 @@ namespace Biometria
             return histogram;
         }
 
-        public int[] Histogram(Bitmap OriginalImage)
+
+
+        private int[] LUTRozciagniecie(int a, int b)
         {
-            int[] histogram = new int[256];
+            int[] result = new int[256];
+            //double aa = ;
+            for (int i = 0; i < 256; i++)
+            {
+                if ((int)(255 * Math.Abs(i - a) / (b - a)) > 255)
+                {
+                    result[i] = 255;
+                }
+                else
+                    result[i] = (int)(255 * Math.Abs(i - a) / (b - a));
+
+            }
+            return result;
+            // return result;
+        }
+
+        public int a;
+        public int b;
+        public void Rozciagniecie(object sender, RoutedEventArgs e)
+        {
+
+            a = 54;
+            b = 255;
+            RozciągnięcieAiB okno = new RozciągnięcieAiB();
+            if (okno.ShowDialog() == true)
+            {
+                a = okno.a;
+                b = okno.b;
+            }
+
+            int[] hR = new int[256];
+            int[] hG = new int[256];
+            int[] hB = new int[256];
+            for (int i = 0; i < 256; i++)
+            {
+                hR[i] = d[0, i];
+                hG[i] = d[1, i];
+                hB[i] = d[2, i];
+            }
+
+
+            int[] LUTred = LUTRozciagniecie(a, b);
+            int[] LUTgreen = LUTRozciagniecie(a, b);
+            int[] LUTblue = LUTRozciagniecie(a, b);
+
+            //Przetworz obraz i oblicz nowy histogram
+            for (int i = 0; i < 256; i++)
+            {
+                h[0, i] = 0;
+                h[1, i] = 0;
+                h[2, i] = 0;
+            }
+
+            Bitmap oldBitmap = (Bitmap)image;
+            Bitmap newBitmap = new Bitmap(image.Width, image.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            for (int x = 0; x < image.Width; x++)
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    System.Drawing.Color pixel = oldBitmap.GetPixel(x, y);
+                    System.Drawing.Color newPixel = System.Drawing.Color.FromArgb(LUTred[pixel.R], LUTgreen[pixel.G], LUTblue[pixel.B]);
+                    newBitmap.SetPixel(x, y, newPixel);
+                    h[0, newPixel.R]++;
+                    h[1, newPixel.G]++;
+                    h[2, newPixel.B]++;
+                }
+            }
+            image = newBitmap;
+            //MainWindow mw = new MainWindow();
+            Sender.AktualizacjaObrazek(image);
+            //aktualicaja histogramow
+            GenerateValues();
+        }
+
+
+
+
+        private int[] LUTWyrownanie(int[] values, int size)
+        {
+            double minValue = 0;
+            for (int i = 0; i < 256; i++)
+            {
+                if (values[i] != 0)
+                {
+                    minValue = values[i];
+                    break;
+                }
+            }
+
+            int[] result = new int[256];
+            double sum = 0;
+            for (int i = 0; i < 256; i++)
+            {
+                sum += values[i];
+                result[i] = (int)(((sum - minValue) / (size - minValue)) * 255.0);
+            }
+
+            return result;
+        }
+        public void Wyrownanie(object sender, RoutedEventArgs e)
+        {
+            int[] hR = new int[256];
+            int[] hG = new int[256];
+            int[] hB = new int[256];
+            for (int i = 0; i < 256; i++)
+            {
+                hR[i] = d[0, i];
+                hG[i] = d[1, i];
+                hB[i] = d[2, i];
+            }
+            int[] LUTred = LUTWyrownanie(hR, image.Width * image.Height);
+            int[] LUTgreen = LUTWyrownanie(hG, image.Width * image.Height);
+            int[] LUTblue = LUTWyrownanie(hB, image.Width * image.Height);
 
             for (int i = 0; i < 256; i++)
             {
-                histogram[i] = 0;
+                h[0, i] = 0;
+                h[1, i] = 0;
+                h[2, i] = 0;
             }
 
-            for (int m = 0; m < OriginalImage.Width; m++)
+            Bitmap oldBitmap = image;
+            Bitmap newBitmap = new Bitmap(image.Width, image.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            for (int x = 0; x < image.Width; x++)
             {
-                for (int n = 0; n < OriginalImage.Height; n++)
+                for (int y = 0; y < image.Height; y++)
                 {
-                    System.Drawing.Color pixel = OriginalImage.GetPixel(m, n);
-                    int gs = (int)((pixel.R * 0.3) + (pixel.G * 0.59) + (pixel.B * 0.11));
-
-                    histogram[gs]++;
+                    System.Drawing.Color pixel = oldBitmap.GetPixel(x, y);
+                    System.Drawing.Color newPixel = System.Drawing.Color.FromArgb(LUTred[pixel.R], LUTgreen[pixel.G], LUTblue[pixel.B]);
+                    newBitmap.SetPixel(x, y, newPixel);
+                    h[0, newPixel.R]++;
+                    h[1, newPixel.G]++;
+                    h[2, newPixel.B]++;
                 }
             }
-
-            return histogram;
+            image = newBitmap;
+            //MainWindow mw = new MainWindow();
+            Sender.AktualizacjaObrazek(newBitmap);
+            //aktualicaja histogramow
+            GenerateValues();
 
         }
-        public Bitmap HistoramEqualization(Bitmap OriginalImage)
+
+
+        private int[] LUTRozjasnienie(double a)
         {
-            Bitmap image = OriginalImage;
-
-            int[] histogram = this.Histogram(image);
-            int pixelCount = image.Width * image.Height;
-
-            for (int m = 0; m < image.Width; m++)
+            int[] result = new int[256];
+            int b;
+            //System.Drawing.Color c = System.Drawing.Color.FromArgb(r, g, b);
+            for (int i = 0; i < 256; i++)
             {
-                for (int n = 0; n < image.Height; n++)
+                //   System.Drawing.Color c = System.Drawing.Color.FromArgb(valuesR[i], valuesG[i], valuesB[i]);
+                // double cc = Convert.ToDouble(c);
+                b = (int)(Math.Pow(i, a));
+                if ((b) > 255)
                 {
-                    System.Drawing.Color pixel = image.GetPixel(m, n);
-                    int gs = (int)((pixel.R * 0.3) + (pixel.G * 0.59) + (pixel.B * 0.11));
-
-                    Double PSum = 0;
-
-                    for (int i = 0; i < gs + 1; i++)
-                    {
-                        PSum += Convert.ToDouble(histogram[i]) / pixelCount;
-                    }
-
-                    int newgs = Convert.ToInt16(Math.Floor(255 * PSum));
-
-                    image.SetPixel(m, n, System.Drawing.Color.FromArgb(255, newgs, newgs, newgs));
+                    result[i] = 255;
+                }
+                else if ((b) < 0)
+                {
+                    result[i] = 0;
+                }
+                else
+                {
+                    result[i] = b;
                 }
             }
-            return image;
+            return result;
         }
 
-        internal void Show(Bitmap obrazek)
+        public void Rozjasnienie(object sender, RoutedEventArgs e)
         {
-            image = obrazek;
-            this.Show();
+
+            int[] hR = new int[256];
+            int[] hG = new int[256];
+            int[] hB = new int[256];
+            for (int i = 0; i < 256; i++)
+            {
+                hR[i] = d[0, i];
+                hG[i] = d[1, i];
+                hB[i] = d[2, i];
+            }
+
+            int[] LUTred = LUTRozjasnienie(1.07);
+            int[] LUTgreen = LUTRozjasnienie(1.07);
+            int[] LUTblue = LUTRozjasnienie(1.07);
+
+            for (int i = 0; i < 256; i++)
+            {
+                h[0, i] = 0;
+                h[1, i] = 0;
+                h[2, i] = 0;
+            }
+
+            Bitmap oldBitmap = (Bitmap)image;
+            Bitmap newBitmap = new Bitmap(image.Width, image.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            for (int x = 0; x < image.Width; x++)
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    System.Drawing.Color pixel = oldBitmap.GetPixel(x, y);
+                    System.Drawing.Color newPixel = System.Drawing.Color.FromArgb(LUTred[pixel.R], LUTgreen[pixel.G], LUTblue[pixel.B]);
+                    newBitmap.SetPixel(x, y, newPixel);
+                    h[0, newPixel.R]++;
+                    h[1, newPixel.G]++;
+                    h[2, newPixel.B]++;
+                }
+            }
+            image = newBitmap;
+            //MainWindow mw = new MainWindow();
+            Sender.AktualizacjaObrazek(image);
+            //aktualicaja histogramow
+            GenerateValues();
         }
+        public void Przyciemnienie(object sender, RoutedEventArgs e)
+        {
+            int[] hR = new int[256];
+            int[] hG = new int[256];
+            int[] hB = new int[256];
+
+            for (int i = 0; i < 256; i++)
+            {
+                hR[i] = d[0, i];
+                hG[i] = d[1, i];
+                hB[i] = d[2, i];
+            }
+
+            int[] LUTred = LUTRozjasnienie(0.96);
+            int[] LUTgreen = LUTRozjasnienie(0.96);
+            int[] LUTblue = LUTRozjasnienie(0.96);
+
+            for (int i = 0; i < 256; i++)
+            {
+                h[0, i] = 0;
+                h[1, i] = 0;
+                h[2, i] = 0;
+            }
+
+            Bitmap oldBitmap = (Bitmap)image;
+            Bitmap newBitmap = new Bitmap(image.Width, image.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            for (int x = 0; x < image.Width; x++)
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    System.Drawing.Color pixel = oldBitmap.GetPixel(x, y);
+                    System.Drawing.Color newPixel = System.Drawing.Color.FromArgb(LUTred[pixel.R], LUTgreen[pixel.G], LUTblue[pixel.B]);
+                    newBitmap.SetPixel(x, y, newPixel);
+                    h[0, newPixel.R]++;
+                    h[1, newPixel.G]++;
+                    h[2, newPixel.B]++;
+                }
+            }
+            image = newBitmap;
+            //MainWindow mw = new MainWindow();
+            Sender.AktualizacjaObrazek(image);
+            //aktualicaja histogramow
+            GenerateValues();
+        }
+
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -144,8 +361,8 @@ namespace Biometria
                     new LineSeries
                     {
                         Title = "R",
-                       // LineSmoothness = 0,
-                        //StrokeThickness = 3,                   
+                       //LineSmoothness = 0,
+                        //StrokeThickness = 1,                   
                         //PointGeometry = Geometry.Parse("m 2 2 2 4 4 4 4 2"),
                         //Stroke = new SolidColorBrush(Color.FromRgb(116,191,155)),
                         Stroke = new SolidColorBrush(Colors.Red),
@@ -195,5 +412,6 @@ namespace Biometria
             GenerateValues();
         }
     }
-
 }
+
+

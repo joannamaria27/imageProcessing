@@ -10,7 +10,7 @@
     <Grid>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Visible" >
-            <Image Name="obrazek_powiekszenie" PreviewMouseDown="Zamknij"  HorizontalAlignment="Left" MinHeight="640" MinWidth="480" Margin="10,10,0,0" VerticalAlignment="Top"/>
+            <Image Name="obrazek_powiekszenie" PreviewMouseDown="Zamknij"  HorizontalAlignment="Left" MinHeight="2000" MinWidth="2000" Margin="10,10,0,0" VerticalAlignment="Top"/>
         </ScrollViewer>
 
 
