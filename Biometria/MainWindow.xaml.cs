@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32;
+﻿
+using Accord.Imaging.Filters;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
@@ -28,7 +30,7 @@ namespace Biometria
         public MainWindow()
         {
             InitializeComponent();
-            
+
             obrazek_2.Source = obrazek.Source;
         }
         private void ZaladujZPliku(object sender, RoutedEventArgs e)
@@ -181,8 +183,10 @@ namespace Biometria
         }
         private void Powieksz2(object sender, RoutedEventArgs e)
         {
+
             Powiekszenie powiekszenie = new Powiekszenie();
             powiekszenie.Show(obrazek_2);
+
         }
 
         Color kolor;
@@ -255,7 +259,7 @@ namespace Biometria
             //if (source.Format == PixelFormats.Indexed8)
             //{ }
             //else
-                target.WritePixels(new Int32Rect(x, y, 1, 1), ColorData, 4, 0);
+            target.WritePixels(new Int32Rect(x, y, 1, 1), ColorData, 4, 0);
             obrazek.Source = target;
         }
 
@@ -271,21 +275,197 @@ namespace Biometria
                 return new System.Drawing.Bitmap(bitmap);
             }
         }
+        public BitmapImage ConvertBitmapImage(System.Drawing.Bitmap bitmap)
+        {
+            MemoryStream ms = new MemoryStream();
+            bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            ms.Seek(0, SeekOrigin.Begin);
+            image.StreamSource = ms;
+            image.EndInit();
+
+            return image;
+        }
 
         public System.Drawing.Bitmap b;
         private void HistogramyWyswietl(object sender, RoutedEventArgs e)
         {
-            
-                
-                BitmapImage source = obrazek.Source as BitmapImage;
+            try
+            {
+                BitmapImage source = obrazek_2.Source as BitmapImage;
                 System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
-                
-                Histogramy histogramy = new Histogramy();
+
+                Histogramy histogramy = new Histogramy(this);
                 histogramy.Show(b);
-            
-            
-     
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Brak obrazka!", "Histogramy", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
+        public void AktualizacjaObrazek(System.Drawing.Bitmap image)
+        {
+            Histogramy histogramy = new Histogramy(this);
+            obrazek.Source = ConvertBitmapImage(image);
+        }
+
+        private void Szarosc(System.Drawing.Bitmap bmp)
+        {
+            System.Drawing.Color p;
+            //grayscale
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    //get pixel value
+                    p = bmp.GetPixel(x, y);
+
+                    //extract pixel component ARGB
+                    int a = p.A;
+                    int r = p.R;
+                    int g = p.G;
+                    int b = p.B;
+
+                    //find average
+                    int avg = (r + g + b) / 3;
+
+                    //set new pixel value
+                    bmp.SetPixel(x, y, System.Drawing.Color.FromArgb(a, avg, avg, avg));
+                }
+            }
+            obrazek.Source = ConvertBitmapImage(bmp);
+        }
+
+        private void SkalaSzarosci(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            Szarosc(b);
+        }
+
+
+        private void BinazyzacjaReczna(object sender, RoutedEventArgs e)
+        {
+            int prog = 120;
+            ProgReczny okno = new ProgReczny();
+            if (okno.ShowDialog() == true)
+                prog = okno.a;
+
+
+
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            Szarosc(b);
+            if (b != null)
+            {
+                System.Drawing.Color curColor;
+                int ret;
+
+                for (int iX = 0; iX < b.Width; iX++)
+                {
+                    for (int iY = 0; iY < b.Height; iY++)
+                    {
+                        curColor = b.GetPixel(iX, iY);
+                        ret = curColor.R;
+
+
+                        ///ustawic próg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        if (ret > prog)
+                        {
+                            ret = 255;
+                        }
+                        else
+                        {
+                            ret = 0;
+                        }
+                        b.SetPixel(iX, iY, System.Drawing.Color.FromArgb(ret, ret, ret));
+                    }
+                }
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+        }
+        private void BinaryzacjaLokalna(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            Szarosc(b);
+            if (b != null)
+            {
+                System.Drawing.Color curColor;
+                int ret;
+
+                for (int iX = 0; iX < b.Width; iX++)
+                {
+                    for (int iY = 0; iY < b.Height; iY++)
+                    {
+                        curColor = b.GetPixel(iX, iY);
+                        ret = curColor.R;
+                        var niblack = new NiblackThreshold();
+
+                        //System.Drawing.Bitmap result = niblack.Apply(b);
+
+                        //var otsu = new OtsuThreshold();
+                        // This is our threshold, you can change it and to try what are different.
+                        //////////////////////////////////////////////////////////////////
+                        ///ustawic próg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        if (ret > 120)
+                        {
+                            ret = 255;
+                        }
+                        else
+                        {
+                            ret = 0;
+                        }
+                        b.SetPixel(iX, iY, System.Drawing.Color.FromArgb(ret, ret, ret));
+                    }
+                }
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+        }
+        private void BinaryzacjaAutomatyczna(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            Szarosc(b);
+
+
+            if (b != null)
+            {
+                System.Drawing.Color curColor;
+                int ret;
+
+                for (int iX = 0; iX < b.Width; iX++)
+                {
+                    for (int iY = 0; iY < b.Height; iY++)
+                    {
+                        curColor = b.GetPixel(iX, iY);
+                        ret = curColor.R;
+
+                        OtsuThreshold filter = new OtsuThreshold();
+                        // apply the filter
+                      //filter.ApplyInPlace(b);
+                        // check threshold value
+                        int t = filter.ThresholdValue;
+                        // This is our threshold, you can change it and to try what are different.
+                        //////////////////////////////////////////////////////////////////
+                        ///ustawic próg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        if (ret > t)
+                        {
+                            ret = 255;
+                        }
+                        else
+                        {
+                            ret = 0;
+                        }
+                        b.SetPixel(iX, iY, System.Drawing.Color.FromArgb(ret, ret, ret));
+                    }
+                }
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+        }
+
+      
     }
 }
 

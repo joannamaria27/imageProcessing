@@ -39,7 +39,7 @@ namespace Biometria
             pickerColor.SelectedColor = kolor;
             _x = x;
             _y = y;
-            this.Show();
+            this.ShowDialog();
 
         }
     }

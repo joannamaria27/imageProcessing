@@ -6,72 +6,67 @@
         xmlns:local="clr-namespace:Biometria"
         mc:Ignorable="d"
         Title="Biometria" Height="600" Width="1000"
-        Background ="Teal"
+        Background ="White"
         RenderOptions.BitmapScalingMode="NearestNeighbor"
         >
-  <!--Title="Biometria" Height="600" Width="1000"-->
+    <!--Title="Biometria" Height="600" Width="1000"-->
 
-  <Grid>
-    <DockPanel>
-      <Menu DockPanel.Dock="Top">
-        <MenuItem Header="_Obrazek" >
-          <MenuItem Header="_Wczytaj z pliku" Click="ZaladujZPliku" >
-            <MenuItem.Icon>
-              <Image Source="Image/share.png" />
-            </MenuItem.Icon>
-          </MenuItem>
-          <Separator />
-          <MenuItem Header="_Zapisz jako JPG" Click="ZapiszJPG" >
-          </MenuItem>
-          <MenuItem Header="_Zapisz jako BMP" Click="ZapiszBMP" >
-          </MenuItem>
-          <MenuItem Header="_Zapisz jako PNG" Click="ZapiszPNG" >
-          </MenuItem>
-          <MenuItem Header="_Zapisz jako GIF" Click="ZapiszGIF" >
-          </MenuItem>
-          <MenuItem Header="_Zapisz jako TIFF" Click="ZapiszTIFF" >
-          </MenuItem>
-        </MenuItem>
-        <MenuItem Header="_Powiększanie">
-          <MenuItem Header="_obrazek lewy" Click="Powieksz">
-            <MenuItem.Icon>
-              <Image Source="Image\back.png" />
-            </MenuItem.Icon>
-          </MenuItem>
-          <MenuItem Header="_obrazek prawy" Click="Powieksz2">
-            <MenuItem.Icon>
-              <Image Source="/Biometria;component/Image/right.png" />
-            </MenuItem.Icon>
-          </MenuItem>
-        </MenuItem>
-        <MenuItem Header="_Edytcja obrazu">
-          <MenuItem Header="_rozjaśnij" />
-          <MenuItem Header="_przyciemnij"/>
-        </MenuItem>
-        <MenuItem Header="_Histogramy">
-          <MenuItem Header="_histogramy dla kanałów R, G i B"  Click="HistogramyWyswietl" />
-          <MenuItem Header="_histogram dla wartości uśrednionych (R+G+B)/3"/>
-        </MenuItem>
-      </Menu>
+    <Grid>
+        <DockPanel  >
+            <Menu DockPanel.Dock="Top" IsMainMenu="True" >
+                <MenuItem Background="LightGray" Header="_Obrazek" >
+                    <MenuItem Background="LightGray" Header="_Wczytaj z pliku" Click="ZaladujZPliku" >
+                        <MenuItem.Icon>
+                            <Image Source="Image/share.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem Background="LightGray" Header="_Zapisz jako JPG" Click="ZapiszJPG" />
+                    <MenuItem Background="LightGray" Header="_Zapisz jako BMP" Click="ZapiszBMP" />
+                    <MenuItem Background="LightGray" Header="_Zapisz jako PNG" Click="ZapiszPNG" />
+                    <MenuItem Background="LightGray" Header="_Zapisz jako GIF" Click="ZapiszGIF" />
+                    <MenuItem Background="LightGray" Header="_Zapisz jako TIFF" Click="ZapiszTIFF" />
+                </MenuItem>
+                <MenuItem Background="LightGray" Header="_Powiększanie">
+                    <MenuItem Background="LightGray" Header="_obrazek lewy" Click="Powieksz">
+                        <MenuItem.Icon>
+                            <Image Source="Image\back.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Background="LightGray" Header="_obrazek prawy" Click="Powieksz2">
+                        <MenuItem.Icon>
+                            <Image Source="/Biometria;component/Image/right.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Background="LightGray" Header="_Histogramy (obrazek główny - prawy)" Click="HistogramyWyswietl"/>
+                <MenuItem Background="LightGray" Header="_Binaryzacja">
+                    <MenuItem Background="LightGray" Header="_Binaryzacja reczna" Click="BinazyzacjaReczna" />
+                    <MenuItem Background="LightGray" Header="_Binaryzacja automatyczna" Click="BinaryzacjaAutomatyczna"/>
+                    <MenuItem Background="LightGray" Header="_Binaryzacja lokalna" Click="BinaryzacjaLokalna"/>
+                    <MenuItem Background="LightGray" Header="_Skala szarosci" Click="SkalaSzarosci"/>
+                    
+                </MenuItem>
+            </Menu>
 
-    </DockPanel>
-    <StackPanel x:Name="g" Height="450" Margin="30,10,520,50" Width="450" >
+        </DockPanel>
+        <StackPanel x:Name="g" Height="450" Margin="30,10,520,50" Width="450" >
 
-      <Image MouseMove="WartoscPixeli" MouseDown="ZmianaKoloru" Cursor="Cross" Source="Image\ImagePNG.png" Name="obrazek" Height="auto" Stretch="Uniform" Width="auto"/>
-    </StackPanel>
+            <Image MouseMove="WartoscPixeli" MouseDown="ZmianaKoloru" Cursor="Cross" Source="Image\ImagePNG.png" Name="obrazek" Height="auto" Stretch="Uniform" Width="auto"/>
+        </StackPanel>
 
-    <StackPanel Height="450" Margin="520,10,30,50" Width="450">
+        <StackPanel Height="450" Margin="520,10,30,50" Width="450">
 
-      <Image Name="obrazek_2" Height="auto" Width="auto" Stretch="Uniform" />
-    </StackPanel>
+            <Image Name="obrazek_2" Height="auto" Width="auto" Stretch="Uniform" />
+        </StackPanel>
 
-    <StackPanel Margin="200,450,0,0" Width="200" Height="65">
-      <Rectangle Fill="Black" Name="kwadrat" Width="60" Height="60"/>
-    </StackPanel>
-    <StackPanel Margin="0,450,200,0" Width="200" Height="60">
-      <TextBox Name="Pixel_Y" Text="Y: " TextWrapping="Wrap" Width="200" Height="20"/>
-      <TextBox Name="Pixel_X" Text="X: " TextWrapping="Wrap" Width="200" Height="20"/>
-      <TextBox Name="RGB" Text="RGB: " TextWrapping="Wrap" Width="200" Height="20"/>
-    </StackPanel>
-  </Grid>
+        <StackPanel Margin="200,450,0,0" Width="200" Height="65">
+            <Rectangle Fill="Black" Name="kwadrat" Width="60" Height="60"/>
+        </StackPanel>
+        <StackPanel Margin="0,450,200,0" Width="200" Height="60">
+            <TextBox Name="Pixel_Y" Text="Y: " TextWrapping="Wrap" Width="200" Height="20"/>
+            <TextBox Name="Pixel_X" Text="X: " TextWrapping="Wrap" Width="200" Height="20"/>
+            <TextBox Name="RGB" Text="RGB: " TextWrapping="Wrap" Width="200" Height="20"/>
+        </StackPanel>
+    </Grid>
 </Window>
