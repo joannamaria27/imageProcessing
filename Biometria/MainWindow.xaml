@@ -45,7 +45,19 @@
                     <MenuItem Background="LightGray" Header="_Binaryzacja automatyczna" Click="BinaryzacjaAutomatyczna"/>
                     <MenuItem Background="LightGray" Header="_Binaryzacja lokalna" Click="BinaryzacjaLokalna"/>
                     <MenuItem Background="LightGray" Header="_Skala szarosci" Click="SkalaSzarosci"/>
-                    
+
+                </MenuItem>
+                <MenuItem Background="LightGray" Header="_Filtry liniowe">
+                    <MenuItem Background="LightGray" Header="_Filtr rozmywający (filtr dolnoprzepustowy)"  />
+                    <MenuItem Background="LightGray" Header="_Filtr Prewitta"  />
+                    <MenuItem Background="LightGray" Header="_Filtr Sobela"  />
+                    <MenuItem Background="LightGray" Header="_Filtr Laplace'a"  />
+                    <MenuItem Background="LightGray" Header="_Filtr wykrywający narożniki"  />
+                </MenuItem>
+                <MenuItem Background="LightGray" Header="_Filtr Kuwahara"/>
+                <MenuItem Background="LightGray" Header="_Filtry medianowe">
+                    <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 3x3"/>
+                    <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 5x5"/>
                 </MenuItem>
             </Menu>
 

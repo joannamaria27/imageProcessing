@@ -24,15 +24,15 @@ namespace Biometria
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
-
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
-
             obrazek_2.Source = obrazek.Source;
         }
+
+        #region Ładowanie_i_zapis
         private void ZaladujZPliku(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -108,7 +108,6 @@ namespace Biometria
             {
                 try
                 {
-
                     var encoder = new TiffBitmapEncoder();
                     BitmapImage obr = new BitmapImage();
 
@@ -133,7 +132,6 @@ namespace Biometria
             {
                 try
                 {
-
                     var encoder = new GifBitmapEncoder();
                     BitmapImage obr = new BitmapImage();
 
@@ -142,7 +140,6 @@ namespace Biometria
                     {
                         encoder.Save(stream);
                     }
-
                 }
                 catch (Exception eeee)
                 {
@@ -176,6 +173,9 @@ namespace Biometria
             }
         }
 
+        #endregion
+
+        #region Powiekszenie
         private void Powieksz(object sender, RoutedEventArgs e)
         {
             Powiekszenie powiekszenie = new Powiekszenie();
@@ -183,12 +183,13 @@ namespace Biometria
         }
         private void Powieksz2(object sender, RoutedEventArgs e)
         {
-
             Powiekszenie powiekszenie = new Powiekszenie();
             powiekszenie.Show(obrazek_2);
-
         }
 
+        #endregion
+
+        #region Zmiana_pixeli
         Color kolor;
         int _x;
         int _y;
@@ -215,7 +216,6 @@ namespace Biometria
                 kolor = c;
                 _x = x;
                 _y = y;
-
             }
             else if (bitmapImage.Format == PixelFormats.Indexed8)
             {
@@ -242,7 +242,6 @@ namespace Biometria
                 _y = y;
             }
         }
-
         private void ZmianaKoloru(object sender, RoutedEventArgs e)
         {
             RGB kolory = new RGB(this);
@@ -253,16 +252,16 @@ namespace Biometria
         {
             BitmapSource source = obrazek.Source as BitmapSource;
             WriteableBitmap target = new WriteableBitmap(source);
-            //int stride = source.PixelWidth * (source.Format.BitsPerPixel + 7) / 8;
 
             byte[] ColorData = { k.A, k.R, k.G, k.B };
-            //if (source.Format == PixelFormats.Indexed8)
-            //{ }
-            //else
+
             target.WritePixels(new Int32Rect(x, y, 1, 1), ColorData, 4, 0);
             obrazek.Source = target;
         }
 
+        #endregion
+
+        #region ZamianaBitmap
         private System.Drawing.Bitmap BitmapImage2DBitmap(BitmapImage bitmapImage)
         {
             using (MemoryStream outStream = new MemoryStream())
@@ -288,6 +287,10 @@ namespace Biometria
             return image;
         }
 
+        #endregion
+
+        #region Histogramy
+
         public System.Drawing.Bitmap b;
         private void HistogramyWyswietl(object sender, RoutedEventArgs e)
         {
@@ -309,32 +312,31 @@ namespace Biometria
             Histogramy histogramy = new Histogramy(this);
             obrazek.Source = ConvertBitmapImage(image);
         }
+        #endregion
 
-        private void Szarosc(System.Drawing.Bitmap bmp)
+        #region Binaryzacja
+        private void Szarosc(System.Drawing.Bitmap gmp)
         {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap bmp = BitmapImage2DBitmap(source);
             System.Drawing.Color p;
-            //grayscale
             for (int y = 0; y < bmp.Height; y++)
             {
                 for (int x = 0; x < bmp.Width; x++)
                 {
-                    //get pixel value
                     p = bmp.GetPixel(x, y);
 
-                    //extract pixel component ARGB
                     int a = p.A;
                     int r = p.R;
                     int g = p.G;
                     int b = p.B;
-
-                    //find average
                     int avg = (r + g + b) / 3;
 
-                    //set new pixel value
                     bmp.SetPixel(x, y, System.Drawing.Color.FromArgb(a, avg, avg, avg));
                 }
             }
-            obrazek.Source = ConvertBitmapImage(bmp);
+            obrazek_2.Source = ConvertBitmapImage(bmp);
+            //obrazek.Source = ConvertBitmapImage(bmp);
         }
 
         private void SkalaSzarosci(object sender, RoutedEventArgs e)
@@ -344,15 +346,13 @@ namespace Biometria
             Szarosc(b);
         }
 
-
         private void BinazyzacjaReczna(object sender, RoutedEventArgs e)
         {
+
             int prog = 120;
             ProgReczny okno = new ProgReczny();
             if (okno.ShowDialog() == true)
                 prog = okno.a;
-
-
 
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
@@ -360,26 +360,20 @@ namespace Biometria
             if (b != null)
             {
                 System.Drawing.Color curColor;
-                int ret;
+                int kolor;
 
-                for (int iX = 0; iX < b.Width; iX++)
+                for (int i = 0; i < b.Width; i++)
                 {
-                    for (int iY = 0; iY < b.Height; iY++)
+                    for (int j = 0; j < b.Height; j++)
                     {
-                        curColor = b.GetPixel(iX, iY);
-                        ret = curColor.R;
+                        curColor = b.GetPixel(i, j);
+                        kolor = curColor.R;
 
-
-                        ///ustawic próg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        if (ret > prog)
-                        {
-                            ret = 255;
-                        }
+                        if (kolor > prog)
+                            kolor = 255;
                         else
-                        {
-                            ret = 0;
-                        }
-                        b.SetPixel(iX, iY, System.Drawing.Color.FromArgb(ret, ret, ret));
+                            kolor = 0;
+                        b.SetPixel(i, j, System.Drawing.Color.FromArgb(kolor, kolor, kolor));
                     }
                 }
                 obrazek.Source = ConvertBitmapImage(b);
@@ -387,86 +381,211 @@ namespace Biometria
         }
         private void BinaryzacjaLokalna(object sender, RoutedEventArgs e)
         {
+
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
             Szarosc(b);
             if (b != null)
             {
                 System.Drawing.Color curColor;
-                int ret;
-
-                for (int iX = 0; iX < b.Width; iX++)
+                int kolor;
+                double k = -0.5;
+                int otoczenie = 5;
+                Niblack okno = new Niblack();
+                if (okno.ShowDialog() == true)
                 {
-                    for (int iY = 0; iY < b.Height; iY++)
+                    k = okno.k;
+                    otoczenie = okno.otoczenie;
+                }
+                int[,] prog = new int[b.Width, b.Height];
+
+                prog = NiblackProg(otoczenie, k, b);
+                for (int i = 0; i < b.Width; i++)
+                {
+                    for (int j = 0; j < b.Height; j++)
                     {
-                        curColor = b.GetPixel(iX, iY);
-                        ret = curColor.R;
-                        var niblack = new NiblackThreshold();
+                        curColor = b.GetPixel(i, j);
+                        kolor = curColor.R;
 
-                        //System.Drawing.Bitmap result = niblack.Apply(b);
-
-                        //var otsu = new OtsuThreshold();
-                        // This is our threshold, you can change it and to try what are different.
-                        //////////////////////////////////////////////////////////////////
-                        ///ustawic próg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        if (ret > 120)
-                        {
-                            ret = 255;
-                        }
+                        if (kolor > prog[i, j])
+                            kolor = 255;
                         else
-                        {
-                            ret = 0;
-                        }
-                        b.SetPixel(iX, iY, System.Drawing.Color.FromArgb(ret, ret, ret));
+                            kolor = 0;
+
+                        b.SetPixel(i, j, System.Drawing.Color.FromArgb(kolor, kolor, kolor));
                     }
                 }
                 obrazek.Source = ConvertBitmapImage(b);
             }
+        }
+
+        private int[,] NiblackProg(int wielkoscot, double k, System.Drawing.Bitmap b)
+        {
+            int l = 0;
+            int otoczenie = wielkoscot / 2;
+            int[,] prog = new int[b.Width, b.Height];
+            double[] liczby = new double[wielkoscot * wielkoscot];
+            for (int i = 0; i < b.Width; i++)
+            {
+                for (int j = 0; j < b.Height; j++)
+                {
+                    double suma = 0;
+                    double z = 0;
+                    l = 0;
+                    for (int g = 0; g < wielkoscot * wielkoscot; g++)
+                    {
+                        liczby[g] = 0;
+
+                    }
+                    for (int aa = i - otoczenie; aa < i + otoczenie; aa++)
+                    {
+                        for (int ee = j - otoczenie; ee < j + otoczenie; ee++)
+                        {
+                            if ((aa < 0) || (ee < 0)) continue;
+                            if ((aa >= b.Width) || (ee >= b.Height)) continue;
+                            System.Drawing.Color pixel = b.GetPixel(aa, ee);
+                            suma += pixel.R;
+                            liczby[l] = pixel.R;
+                            l++;
+                        }
+                    }
+                    double sredna = suma / (l);
+                    for (int oo = 0; oo < l; oo++)
+                    {
+                        z += (liczby[oo] - sredna) * (liczby[oo] - sredna);
+                    }
+                    double odchStd = (Math.Sqrt((z / (l))));
+
+                    prog[i, j] = (int)(sredna + k * odchStd);
+                }
+            }
+            return prog;
         }
         private void BinaryzacjaAutomatyczna(object sender, RoutedEventArgs e)
         {
+
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
             Szarosc(b);
 
-
             if (b != null)
             {
                 System.Drawing.Color curColor;
-                int ret;
+                int kolor = 0;
+                int prog;
+                prog = ProgOtsu(b);
 
-                for (int iX = 0; iX < b.Width; iX++)
+
+                for (int i = 0; i < b.Width; i++)
                 {
-                    for (int iY = 0; iY < b.Height; iY++)
+                    for (int j = 0; j < b.Height; j++)
                     {
-                        curColor = b.GetPixel(iX, iY);
-                        ret = curColor.R;
 
-                        OtsuThreshold filter = new OtsuThreshold();
-                        // apply the filter
-                      //filter.ApplyInPlace(b);
-                        // check threshold value
-                        int t = filter.ThresholdValue;
-                        // This is our threshold, you can change it and to try what are different.
-                        //////////////////////////////////////////////////////////////////
-                        ///ustawic próg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        if (ret > t)
+                        curColor = b.GetPixel(i, j);
+                        kolor = curColor.R;
+
+                        if (kolor > prog)
                         {
-                            ret = 255;
+                            kolor = 255;
                         }
                         else
-                        {
-                            ret = 0;
-                        }
-                        b.SetPixel(iX, iY, System.Drawing.Color.FromArgb(ret, ret, ret));
+                            kolor = 0;
+                        b.SetPixel(i, j, System.Drawing.Color.FromArgb(kolor, kolor, kolor));
+
                     }
                 }
+
                 obrazek.Source = ConvertBitmapImage(b);
             }
         }
 
-      
+        private int ProgOtsu(System.Drawing.Bitmap b)
+        {
+            int[] histogram = new int[256];
+
+            for (int m = 0; m < b.Width; m++)
+            {
+                for (int n = 0; n < b.Height; n++)
+                {
+                    System.Drawing.Color pixel = b.GetPixel(m, n);
+                    histogram[pixel.R]++;
+
+                }
+            }
+
+            long[] pob = new long[256];
+            long[] pt = new long[256];
+
+
+            for (int t = 0; t < 256; t++)
+            {
+                for (int t1 = 0; t1 <= t; t1++)
+                {
+                    pob[t] += histogram[t1];
+                }
+
+                for (int t1 = t + 1; t1 < 256; t1++)
+                {
+                    pt[t] += histogram[t1];
+                }
+            }
+
+            double[] srOb = new double[256];
+            double[] srT = new double[256];
+
+            for (int t = 0; t < 256; t++)
+            {
+                for (int k = 0; k <= t; k++)
+                {
+                    srOb[t] += (k * histogram[k]);// / pob[t];
+
+                }
+                for (int k = t + 1; k < 256; k++)
+                {
+
+                    srT[t] += (k * histogram[k]);/// pt[t];
+                }
+            }
+
+            for (int t = 0; t < 256; t++)
+            {
+                if (pob[t] != 0)
+                    srOb[t] = srOb[t] / pob[t];
+                if (pt[t] != 0)
+                    srT[t] = srT[t] / pt[t];
+            }
+
+
+            double[] wariancjaMiedzy = new double[256];
+            double maks = 0;
+
+            for (int t = 0; t < 256; t++)
+            {
+
+                wariancjaMiedzy[t] = pob[t] * pt[t] * (srOb[t] - srT[t]) * (srOb[t] - srT[t]);
+                //(pob[t] * Math.Pow(warOb[t], 2)) + (pt[t] * Math.Pow(warT[t], 2));
+            }
+
+            maks = 0;
+            int x = 0;
+            for (int w = 0; w < 256; w++)
+            {
+                if (wariancjaMiedzy[w] > maks)
+                {
+                    maks = wariancjaMiedzy[w];
+                    x = w;
+                }
+            }
+
+            return x;
+
+        }
+
+
+        #endregion
     }
 }
+
+
 
 
