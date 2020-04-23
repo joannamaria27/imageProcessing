@@ -43,14 +43,12 @@ namespace Biometria
 
         public Bitmap image2;
         public Bitmap image;
-
         int[,] h;
         int[,] d;
 
         public void GenerateValues()
         {
             d = RGBHistogram(image2);
-
             valR.Clear();
             valG.Clear();
             valB.Clear();
@@ -90,8 +88,7 @@ namespace Biometria
             return histogram;
         }
 
-
-
+        #region Rozciągnięcie
         private int[] LUTRozciagniecie(int a, int b)
         {
             int[] result = new int[256];
@@ -99,22 +96,17 @@ namespace Biometria
             for (int i = 0; i < 256; i++)
             {
                 if ((int)(255 * Math.Abs(i - a) / (b - a)) > 255)
-                {
                     result[i] = 255;
-                }
                 else
                     result[i] = (int)(255 * Math.Abs(i - a) / (b - a));
-
             }
             return result;
-            // return result;
-        }
 
+        }
         public int a;
         public int b;
         public void Rozciagniecie(object sender, RoutedEventArgs e)
         {
-
             a = 54;
             b = 255;
             RozciągnięcieAiB okno = new RozciągnięcieAiB();
@@ -124,22 +116,10 @@ namespace Biometria
                 b = okno.b;
             }
 
-            int[] hR = new int[256];
-            int[] hG = new int[256];
-            int[] hB = new int[256];
-            for (int i = 0; i < 256; i++)
-            {
-                hR[i] = d[0, i];
-                hG[i] = d[1, i];
-                hB[i] = d[2, i];
-            }
-
-
             int[] LUTred = LUTRozciagniecie(a, b);
             int[] LUTgreen = LUTRozciagniecie(a, b);
             int[] LUTblue = LUTRozciagniecie(a, b);
 
-            //Przetworz obraz i oblicz nowy histogram
             for (int i = 0; i < 256; i++)
             {
                 h[0, i] = 0;
@@ -162,15 +142,13 @@ namespace Biometria
                 }
             }
             image = newBitmap;
-            //MainWindow mw = new MainWindow();
             Sender.AktualizacjaObrazek(image);
-            //aktualicaja histogramow
             GenerateValues();
         }
 
+        #endregion
 
-
-
+        #region Wyrównanie
         private int[] LUTWyrownanie(int[] values, int size)
         {
             double minValue = 0;
@@ -182,7 +160,6 @@ namespace Biometria
                     break;
                 }
             }
-
             int[] result = new int[256];
             double sum = 0;
             for (int i = 0; i < 256; i++)
@@ -190,7 +167,6 @@ namespace Biometria
                 sum += values[i];
                 result[i] = (int)(((sum - minValue) / (size - minValue)) * 255.0);
             }
-
             return result;
         }
         public void Wyrownanie(object sender, RoutedEventArgs e)
@@ -230,53 +206,31 @@ namespace Biometria
                 }
             }
             image = newBitmap;
-            //MainWindow mw = new MainWindow();
             Sender.AktualizacjaObrazek(newBitmap);
-            //aktualicaja histogramow
             GenerateValues();
-
         }
 
+        #endregion
 
+        #region Rozjaśnianie/Przyciemianie
         private int[] LUTRozjasnienie(double a)
         {
             int[] result = new int[256];
             int b;
-            //System.Drawing.Color c = System.Drawing.Color.FromArgb(r, g, b);
             for (int i = 0; i < 256; i++)
             {
-                //   System.Drawing.Color c = System.Drawing.Color.FromArgb(valuesR[i], valuesG[i], valuesB[i]);
-                // double cc = Convert.ToDouble(c);
                 b = (int)(Math.Pow(i, a));
                 if ((b) > 255)
-                {
                     result[i] = 255;
-                }
                 else if ((b) < 0)
-                {
                     result[i] = 0;
-                }
                 else
-                {
                     result[i] = b;
-                }
             }
             return result;
         }
-
         public void Rozjasnienie(object sender, RoutedEventArgs e)
         {
-
-            int[] hR = new int[256];
-            int[] hG = new int[256];
-            int[] hB = new int[256];
-            for (int i = 0; i < 256; i++)
-            {
-                hR[i] = d[0, i];
-                hG[i] = d[1, i];
-                hB[i] = d[2, i];
-            }
-
             int[] LUTred = LUTRozjasnienie(1.07);
             int[] LUTgreen = LUTRozjasnienie(1.07);
             int[] LUTblue = LUTRozjasnienie(1.07);
@@ -287,7 +241,6 @@ namespace Biometria
                 h[1, i] = 0;
                 h[2, i] = 0;
             }
-
             Bitmap oldBitmap = (Bitmap)image;
             Bitmap newBitmap = new Bitmap(image.Width, image.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
             for (int x = 0; x < image.Width; x++)
@@ -303,24 +256,11 @@ namespace Biometria
                 }
             }
             image = newBitmap;
-            //MainWindow mw = new MainWindow();
             Sender.AktualizacjaObrazek(image);
-            //aktualicaja histogramow
             GenerateValues();
         }
         public void Przyciemnienie(object sender, RoutedEventArgs e)
         {
-            int[] hR = new int[256];
-            int[] hG = new int[256];
-            int[] hB = new int[256];
-
-            for (int i = 0; i < 256; i++)
-            {
-                hR[i] = d[0, i];
-                hG[i] = d[1, i];
-                hB[i] = d[2, i];
-            }
-
             int[] LUTred = LUTRozjasnienie(0.96);
             int[] LUTgreen = LUTRozjasnienie(0.96);
             int[] LUTblue = LUTRozjasnienie(0.96);
@@ -347,12 +287,11 @@ namespace Biometria
                 }
             }
             image = newBitmap;
-            //MainWindow mw = new MainWindow();
             Sender.AktualizacjaObrazek(image);
-            //aktualicaja histogramow
             GenerateValues();
         }
 
+        #endregion
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -413,5 +352,3 @@ namespace Biometria
         }
     }
 }
-
-
