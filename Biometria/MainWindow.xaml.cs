@@ -583,6 +583,88 @@ namespace Biometria
 
 
         #endregion
+
+        #region Filtry
+
+        private void FiltrWlasny(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+
+            int[,] maska = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } }; //pozniej zmienic
+            b = Filtrowanie(maska, b);
+            int[,] maska2 = { { 1,2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+            b = Filtrowanie(maska2, b);
+        }
+
+        private System.Drawing.Bitmap Filtrowanie(int[,] maska, System.Drawing.Bitmap b)
+        {
+            int dlugosc = maska.Length / 2;
+
+            if (b != null)
+            {
+                System.Drawing.Color kolorWejsciowy;
+                System.Drawing.Color kolorZm;
+                int[] kolor = new int[3];
+                int[,] nowePixeleR = new int[b.Width, b.Height];
+                int[,] nowePixeleG = new int[b.Width, b.Height];
+                int[,] nowePixeleB = new int[b.Width, b.Height];
+                for (int x = 0 + dlugosc; x < b.Width - dlugosc; x++)
+                {
+                    for (int y = 0 + dlugosc; y < b.Height - dlugosc; y++)
+                    {
+                        kolorWejsciowy = b.GetPixel(x, y);
+                        kolor[0] = kolorWejsciowy.R;
+                        kolor[1] = kolorWejsciowy.G;
+                        kolor[2] = kolorWejsciowy.B;
+                        int[] nowyKolor = new int[3];
+
+                        for (int i = 0; i < 3; i++)
+                        {
+                            for (int j = 0; j < 3; j++)
+                            {
+                                kolorZm = b.GetPixel(x - i, y - j);
+                                nowyKolor[0] += maska[i, j] * kolorZm.R;
+                                nowyKolor[1] += maska[i, j] * kolorZm.G;
+                                nowyKolor[2] += maska[i, j] * kolorZm.B;
+                            }
+                        }
+
+                        if (nowyKolor[0] >= 255) nowyKolor[0] = 255;
+                        if (nowyKolor[1] >= 255) nowyKolor[1] = 255;
+                        if (nowyKolor[2] >= 255) nowyKolor[2] = 255;
+
+                        if (nowyKolor[0] <= 0) nowyKolor[0] = 0;
+                        if (nowyKolor[1] <= 0) nowyKolor[1] = 0;
+                        if (nowyKolor[2] <= 0) nowyKolor[2] = 0;
+
+                        nowePixeleR[x, y] = nowyKolor[0];
+                        nowePixeleG[x, y] = nowyKolor[1];
+                        nowePixeleB[x, y] = nowyKolor[2];
+                    }
+                }
+
+                for (int x = 0 + dlugosc; x < b.Width - dlugosc; x++)
+                {
+                    for (int y = 0 + dlugosc; y < b.Height - dlugosc; y++)
+                    {
+                        b.SetPixel(x, y, System.Drawing.Color.FromArgb(nowePixeleR[x, y], nowePixeleG[x, y], nowePixeleB[x, y]));
+                    }
+                }
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+            return b;
+        }
+
+
+
+
+
+
+
+
+        #endregion
+
     }
 }
 
