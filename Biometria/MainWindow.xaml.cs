@@ -590,11 +590,26 @@ namespace Biometria
         {
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            int[,] maska = new int [3,3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+            FiltrWlasny okno = new FiltrWlasny();
+            if (okno.ShowDialog() == true)
+            {
+                maska = okno.maska;
+            }
 
-            int[,] maska = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } }; //pozniej zmienic
             b = Filtrowanie(maska, b);
-            int[,] maska2 = { { 1,2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
-            b = Filtrowanie(maska2, b);
+
+        }
+
+        private void FiltrRozmywajacy(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            //System.Drawing.Bitmap b1 = BitmapImage2DBitmap(source);
+            int[,] maska = new int[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+            int[,] maska1 = new int[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+            b = Filtrowanie(maska, b);
+            b = Filtrowanie(maska1, b);
         }
 
         private System.Drawing.Bitmap Filtrowanie(int[,] maska, System.Drawing.Bitmap b)

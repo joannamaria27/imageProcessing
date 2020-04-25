@@ -49,7 +49,7 @@
                 </MenuItem>
                 <MenuItem Background="LightGray" Header="_Filtry liniowe">
                     <MenuItem Background="LightGray" Header="_Filtr własny" Click="FiltrWlasny" />
-                    <MenuItem Background="LightGray" Header="_Filtr rozmywający (filtr dolnoprzepustowy)"  />
+                    <MenuItem Background="LightGray" Header="_Filtr rozmywający (filtr dolnoprzepustowy)" Click="FiltrRozmywajacy" />
                     <MenuItem Background="LightGray" Header="_Filtr Prewitta"  />
                     <MenuItem Background="LightGray" Header="_Filtr Sobela"  />
                     <MenuItem Background="LightGray" Header="_Filtr Laplace'a"  />

@@ -28,7 +28,7 @@ namespace Biometria
 
             this.DialogResult = true;
 
-            if ((!(double.TryParse(txtAnswer1.Text, out k))) && !(int.TryParse(txtAnswer3.Text, out otoczenie)))
+            if ((!(double.TryParse(txtAnswer1.Text, out k))) || !(int.TryParse(txtAnswer3.Text, out otoczenie)))
             {
                 k = -0.5;
                 otoczenie = 5;

@@ -32,7 +32,7 @@ namespace Biometria
 
             this.DialogResult = true;
 
-            if ((!(int.TryParse(txtAnswer1.Text, out a))) && !(int.TryParse(txtAnswer3.Text, out a)))
+            if ((!(int.TryParse(txtAnswer1.Text, out a))) || !(int.TryParse(txtAnswer3.Text, out a)))
             {
                 a = 54;
                 b = 255;
