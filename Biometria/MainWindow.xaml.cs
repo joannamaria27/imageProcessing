@@ -597,50 +597,149 @@ namespace Biometria
             {
                 maska = okno.maska;
             }
-
-            b = Filtrowanie(maska,1, b);
-
+            b = Filtrowanie(maska, 1, b);
         }
         private void FiltrRozmywajacy(object sender, RoutedEventArgs e)
         {
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
-            int[,] maska1 = new int[3, 3] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
-            b = Filtrowanie(maska1,9, b);
+            int[,] maska = new int[3, 3] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
+            b = Filtrowanie(maska, 9, b);
+
         }
 
         private void FiltrPrewitta(object sender, RoutedEventArgs e)
         {
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
-            int[,] maska = new int[3, 3] { { -1, 0, 1 }, { -1, 0, 1 }, { -1, 0, 1 } };
-            b = Filtrowanie(maska,1, b);
+            int[,] maskaHoryzontalna = new int[3, 3] { { 1, 1, 1 }, { 0, 0, 0 }, { -1, -1, -1 } };
+            int[,] maskaWertykalna = new int[3, 3] { { 1, 0, -1 }, { 1, 0, -1 }, { 1, 0, -1 } };
+
+            int[,,] pixelePoFiltracji1 = FiltrowanieOdczytPixeli(maskaHoryzontalna, 1, b);
+            int[,,] pixelePoFiltracji2 = FiltrowanieOdczytPixeli(maskaWertykalna, 1, b);
+
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji1, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji2, b);
         }
         private void FiltrSobela(object sender, RoutedEventArgs e)
         {
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
-            int[,] maska = new int[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
-            b = Filtrowanie(maska,1, b);
-        }
+            int[,] maskapozioma = new int[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+            int[,] maskapionowa = new int[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
 
+            int[,,] pixelePoFiltracji1 = FiltrowanieOdczytPixeli(maskapozioma, 1, b);
+            int[,,] pixelePoFiltracji2 = FiltrowanieOdczytPixeli(maskapionowa, 1, b);
+
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji1, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji2, b);
+        }
 
         private void FiltrLaplacea(object sender, RoutedEventArgs e)
         {
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
-            int[,] maska = new int[3, 3] { { 0, -1, 0 }, { -1, 4, -1 }, { 0, -1, 0 } };
-            b = Filtrowanie(maska,1, b);
+            int[,] maska = new int[3, 3] { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } };
+            b = Filtrowanie(maska, 1, b);
         }
+
         private void FiltrWykrywajacyNarozniki(object sender, RoutedEventArgs e)
         {
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
-            int[,] maska = new int[3, 3] { { 1, 1, 1 }, { 1, -2, -1 }, { 1, -1, -1 } };
-            b = Filtrowanie(maska,1, b);
+            int[,] maska0 = new int[3, 3] { { 1, 1, 1 }, { 1, -2, -1 }, { 1, -1, -1 } };
+            int[,] maska1 = new int[3, 3] { { 1, 1, 1 }, { -1, -2, 1 }, { 1, -1, 1 } };
+            int[,] maska2 = new int[3, 3] { { 1, -1, -1 }, { 1, -2, -1 }, { 1, 1, 1 } };
+            int[,] maska3 = new int[3, 3] { { -1, -1, 1 }, { -1, -2, 1 }, { 1, 1, 1 } };
+
+            int[,,] pixelePoFiltracji1 = FiltrowanieOdczytPixeli(maska0, 1, b);
+            int[,,] pixelePoFiltracji2 = FiltrowanieOdczytPixeli(maska1, 1, b);
+            int[,,] pixelePoFiltracji3 = FiltrowanieOdczytPixeli(maska2, 1, b);
+            int[,,] pixelePoFiltracji4 = FiltrowanieOdczytPixeli(maska3, 1, b);
+
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji1, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji2, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji3, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji4, b);
         }
 
 
+        //filtrowanie na kilku maskach
+        private int[,,] FiltrowanieOdczytPixeli(int[,] maska, int dzielnik, System.Drawing.Bitmap b)
+        {
+            int dlugosc = 1;
+            int[,,] pixelergb = new int[3, b.Width, b.Height];
+            if (b != null)
+            {
+                System.Drawing.Color kolorZm;
+                int[] kolor = new int[3];
+
+                int[,] nowePixeleR = new int[b.Width, b.Height];
+                int[,] nowePixeleG = new int[b.Width, b.Height];
+                int[,] nowePixeleB = new int[b.Width, b.Height];
+                for (int x = dlugosc; x < b.Width - dlugosc; x++)
+                {
+                    for (int y = dlugosc; y < b.Height - dlugosc; y++)
+                    {
+
+                        int[] nowyKolor = new int[3];
+
+                        int a1 = 1, a2 = 1;
+                        for (int i = -1; i <= 1; i++)
+                        {
+                            for (int j = -1; j <= 1; j++)
+                            {
+                                kolorZm = b.GetPixel(x + i, y + j);
+                                nowyKolor[0] += maska[a1 + i, a2 + j] * kolorZm.R;
+                                nowyKolor[1] += maska[a1 + i, a2 + j] * kolorZm.G;
+                                nowyKolor[2] += maska[a1 + i, a2 + j] * kolorZm.B;
+                            }
+                        }
+
+                        nowyKolor[0] /= dzielnik;
+                        nowyKolor[1] /= dzielnik;
+                        nowyKolor[2] /= dzielnik;
+
+                        if (nowyKolor[0] >= 255) nowyKolor[0] = 255;
+                        if (nowyKolor[1] >= 255) nowyKolor[1] = 255;
+                        if (nowyKolor[2] >= 255) nowyKolor[2] = 255;
+
+                        if (nowyKolor[0] <= 0) nowyKolor[0] = 0;
+                        if (nowyKolor[1] <= 0) nowyKolor[1] = 0;
+                        if (nowyKolor[2] <= 0) nowyKolor[2] = 0;
+
+                        nowePixeleR[x, y] = nowyKolor[0];
+                        nowePixeleG[x, y] = nowyKolor[1];
+                        nowePixeleB[x, y] = nowyKolor[2];
+                        pixelergb[0, x, y] = nowyKolor[0];
+                        pixelergb[1, x, y] = nowyKolor[0];
+                        pixelergb[2, x, y] = nowyKolor[0];
+                    }
+                }
+            }
+            return pixelergb;
+        }
+
+        private System.Drawing.Bitmap FiltrowanieUaktualnienieObrazu(int[,,] maska, System.Drawing.Bitmap b)
+        {
+            int dlugosc = 1;
+            if (b != null)
+            {
+                for (int x = dlugosc; x < b.Width - dlugosc; x++)
+                {
+                    for (int y = dlugosc; y < b.Height - dlugosc; y++)
+                    {
+                        b.SetPixel(x, y, System.Drawing.Color.FromArgb(maska[0, x, y], maska[1, x, y], maska[2, x, y]));
+                    }
+                }
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+            return b;
+        }
+
+
+
+        //filtrowanie poprzez jedną maskę
         private System.Drawing.Bitmap Filtrowanie(int[,] maska, int dzielnik, System.Drawing.Bitmap b)
         {
             int dlugosc = 1;
@@ -657,7 +756,7 @@ namespace Biometria
                 {
                     for (int y = dlugosc; y < b.Height - dlugosc; y++)
                     {
-                        
+
                         int[] nowyKolor = new int[3];
 
                         int a1 = 1, a2 = 1;
@@ -701,7 +800,6 @@ namespace Biometria
             }
             return b;
         }
-
 
         private void FiltrKuwahara(object sender, RoutedEventArgs e)
         {

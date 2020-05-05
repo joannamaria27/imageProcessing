@@ -48,12 +48,12 @@
 
                 </MenuItem>
                 <MenuItem Background="LightGray" Header="_Filtry liniowe">
-                    <MenuItem Background="LightGray" Header="_Filtr własny" Click="FiltrWlasny" />
-                    <MenuItem Background="LightGray" Header="_Filtr rozmywający (filtr dolnoprzepustowy)" Click="FiltrRozmywajacy"  />
-                    <MenuItem Background="LightGray" Header="_Filtr Prewitta" Click="FiltrPrewitta" />
-                    <MenuItem Background="LightGray" Header="_Filtr Sobela" Click="FiltrSobela" />
-                    <MenuItem Background="LightGray" Header="_Filtr Laplace'a"  Click="FiltrLaplacea"/>
-                    <MenuItem Background="LightGray" Header="_Filtr wykrywający narożniki" Click="FiltrWykrywajacyNarozniki" />
+                    <MenuItem Background="LightGray" Header="_Filtr własny (3x3)" Click="FiltrWlasny" />
+                    <MenuItem Background="LightGray" Header="_Filtr rozmywający (maska najpopularniejsza)" Click="FiltrRozmywajacy"  />
+                    <MenuItem Background="LightGray" Header="_Filtr Prewitta (maski pionowa i pozioma)" Click="FiltrPrewitta" />
+                    <MenuItem Background="LightGray" Header="_Filtr Sobela (maski pionowa i pozioma)" Click="FiltrSobela" />
+                    <MenuItem Background="LightGray" Header="_Filtr Laplace'a (maska najpopularniejsza)"  Click="FiltrLaplacea"/>
+                    <MenuItem Background="LightGray" Header="_Filtr wykrywający narożniki (maski 0, 2, 3 i 4)" Click="FiltrWykrywajacyNarozniki" />
                 </MenuItem>
                 <MenuItem Background="LightGray" Header="_Filtr Kuwahara" Click="FiltrKuwahara"/>
                 <MenuItem Background="LightGray" Header="_Filtry medianowe">
