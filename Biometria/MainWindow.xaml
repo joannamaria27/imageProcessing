@@ -49,16 +49,16 @@
                 </MenuItem>
                 <MenuItem Background="LightGray" Header="_Filtry liniowe">
                     <MenuItem Background="LightGray" Header="_Filtr własny" Click="FiltrWlasny" />
-                    <MenuItem Background="LightGray" Header="_Filtr rozmywający (filtr dolnoprzepustowy)" Click="FiltrRozmywajacy" />
-                    <MenuItem Background="LightGray" Header="_Filtr Prewitta"  />
-                    <MenuItem Background="LightGray" Header="_Filtr Sobela"  />
-                    <MenuItem Background="LightGray" Header="_Filtr Laplace'a"  />
-                    <MenuItem Background="LightGray" Header="_Filtr wykrywający narożniki"  />
+                    <MenuItem Background="LightGray" Header="_Filtr rozmywający (filtr dolnoprzepustowy)" Click="FiltrRozmywajacy"  />
+                    <MenuItem Background="LightGray" Header="_Filtr Prewitta" Click="FiltrPrewitta" />
+                    <MenuItem Background="LightGray" Header="_Filtr Sobela" Click="FiltrSobela" />
+                    <MenuItem Background="LightGray" Header="_Filtr Laplace'a"  Click="FiltrLaplacea"/>
+                    <MenuItem Background="LightGray" Header="_Filtr wykrywający narożniki" Click="FiltrWykrywajacyNarozniki" />
                 </MenuItem>
-                <MenuItem Background="LightGray" Header="_Filtr Kuwahara"/>
+                <MenuItem Background="LightGray" Header="_Filtr Kuwahara" Click="FiltrKuwahara"/>
                 <MenuItem Background="LightGray" Header="_Filtry medianowe">
-                    <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 3x3"/>
-                    <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 5x5"/>
+                    <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 3x3" Click="FiltrMaciezowy3x3"/>
+                    <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 5x5" Click="FiltrMaciezowy5x5"/>
                 </MenuItem>
             </Menu>
 
