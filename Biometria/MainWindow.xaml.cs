@@ -213,7 +213,7 @@ namespace Biometria
                 bitmapImage.CopyPixels(new Int32Rect(x, y, 1, 1), pixels, stride, 0);
                 c = bitmapImage.Palette.Colors[pixels[0] >> 4];
                 kwadrat.Fill = new SolidColorBrush(c);
-                RGB.Text = "RGB: 4" + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
+                RGB.Text = "RGB: " + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
                 kolor = c;
                 _x = x;
                 _y = y;
@@ -225,7 +225,7 @@ namespace Biometria
                 bitmapImage.CopyPixels(new Int32Rect(x, y, 1, 1), pixels, stride, 0);
                 c = bitmapImage.Palette.Colors[pixels[0]];
                 kwadrat.Fill = new SolidColorBrush(c);
-                RGB.Text = "RGB: 8" + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
+                RGB.Text = "RGB: " + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
                 kolor = c;
                 _x = x;
                 _y = y;
@@ -237,7 +237,7 @@ namespace Biometria
                 bitmapImage.CopyPixels(new Int32Rect(x, y, 1, 1), pixels, stride, 0);
                 c = Color.FromArgb(pixels[3], pixels[2], pixels[1], pixels[0]);
                 kwadrat.Fill = new SolidColorBrush(c);
-                RGB.Text = "RGB: e" + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
+                RGB.Text = "RGB: " + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
                 kolor = c;
                 _x = x;
                 _y = y;
@@ -592,12 +592,14 @@ namespace Biometria
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
             int[,] maska = new int[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+            int podzielnik = 1;
             FiltrWlasny okno = new FiltrWlasny();
             if (okno.ShowDialog() == true)
             {
                 maska = okno.maska;
+                podzielnik = okno.podzielnik;
             }
-            b = Filtrowanie(maska, 1, b);
+            b = Filtrowanie(maska, podzielnik, b);
         }
         private void FiltrRozmywajacy(object sender, RoutedEventArgs e)
         {
@@ -746,7 +748,6 @@ namespace Biometria
 
             if (b != null)
             {
-                //System.Drawing.Color kolorWejsciowy;
                 System.Drawing.Color kolorZm;
                 int[] kolor = new int[3];
                 int[,] nowePixeleR = new int[b.Width, b.Height];
