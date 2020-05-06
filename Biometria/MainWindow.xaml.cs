@@ -190,6 +190,7 @@ namespace Biometria
         #endregion
 
         #region Zmiana_pixeli
+
         Color kolor;
         int _x;
         int _y;
@@ -212,7 +213,7 @@ namespace Biometria
                 bitmapImage.CopyPixels(new Int32Rect(x, y, 1, 1), pixels, stride, 0);
                 c = bitmapImage.Palette.Colors[pixels[0] >> 4];
                 kwadrat.Fill = new SolidColorBrush(c);
-                RGB.Text = "RGB: 4" + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
+                RGB.Text = "RGB: " + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
                 kolor = c;
                 _x = x;
                 _y = y;
@@ -224,7 +225,7 @@ namespace Biometria
                 bitmapImage.CopyPixels(new Int32Rect(x, y, 1, 1), pixels, stride, 0);
                 c = bitmapImage.Palette.Colors[pixels[0]];
                 kwadrat.Fill = new SolidColorBrush(c);
-                RGB.Text = "RGB: 8" + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
+                RGB.Text = "RGB: " + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
                 kolor = c;
                 _x = x;
                 _y = y;
@@ -236,7 +237,7 @@ namespace Biometria
                 bitmapImage.CopyPixels(new Int32Rect(x, y, 1, 1), pixels, stride, 0);
                 c = Color.FromArgb(pixels[3], pixels[2], pixels[1], pixels[0]);
                 kwadrat.Fill = new SolidColorBrush(c);
-                RGB.Text = "RGB: e" + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
+                RGB.Text = "RGB: " + c + " (" + c.R + ", " + c.G + ", " + c.B + ")";
                 kolor = c;
                 _x = x;
                 _y = y;
@@ -590,45 +591,190 @@ namespace Biometria
         {
             BitmapImage source = obrazek_2.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            int[,] maska = new int[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+            int podzielnik = 1;
+            FiltrWlasny okno = new FiltrWlasny();
+            if (okno.ShowDialog() == true)
+            {
+                maska = okno.maska;
+                podzielnik = okno.podzielnik;
+            }
+            b = Filtrowanie(maska, podzielnik, b);
+        }
+        private void FiltrRozmywajacy(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            int[,] maska = new int[3, 3] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
+            b = Filtrowanie(maska, 9, b);
 
-            int[,] maska = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } }; //pozniej zmienic
-            b = Filtrowanie(maska, b);
-            int[,] maska2 = { { 1,2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
-            b = Filtrowanie(maska2, b);
         }
 
-        private System.Drawing.Bitmap Filtrowanie(int[,] maska, System.Drawing.Bitmap b)
+        private void FiltrPrewitta(object sender, RoutedEventArgs e)
         {
-            int dlugosc = maska.Length / 2;
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            int[,] maskaHoryzontalna = new int[3, 3] { { 1, 1, 1 }, { 0, 0, 0 }, { -1, -1, -1 } };
+            int[,] maskaWertykalna = new int[3, 3] { { 1, 0, -1 }, { 1, 0, -1 }, { 1, 0, -1 } };
+
+            int[,,] pixelePoFiltracji1 = FiltrowanieOdczytPixeli(maskaHoryzontalna, 1, b);
+            int[,,] pixelePoFiltracji2 = FiltrowanieOdczytPixeli(maskaWertykalna, 1, b);
+
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji1, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji2, b);
+        }
+        private void FiltrSobela(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            int[,] maskapozioma = new int[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+            int[,] maskapionowa = new int[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+
+            int[,,] pixelePoFiltracji1 = FiltrowanieOdczytPixeli(maskapozioma, 1, b);
+            int[,,] pixelePoFiltracji2 = FiltrowanieOdczytPixeli(maskapionowa, 1, b);
+
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji1, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji2, b);
+        }
+
+        private void FiltrLaplacea(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            int[,] maska = new int[3, 3] { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } };
+            b = Filtrowanie(maska, 1, b);
+        }
+
+        private void FiltrWykrywajacyNarozniki(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            int[,] maska0 = new int[3, 3] { { 1, 1, 1 }, { 1, -2, -1 }, { 1, -1, -1 } };
+            int[,] maska1 = new int[3, 3] { { 1, 1, 1 }, { -1, -2, 1 }, { 1, -1, 1 } };
+            int[,] maska2 = new int[3, 3] { { 1, -1, -1 }, { 1, -2, -1 }, { 1, 1, 1 } };
+            int[,] maska3 = new int[3, 3] { { -1, -1, 1 }, { -1, -2, 1 }, { 1, 1, 1 } };
+
+            int[,,] pixelePoFiltracji1 = FiltrowanieOdczytPixeli(maska0, 1, b);
+            int[,,] pixelePoFiltracji2 = FiltrowanieOdczytPixeli(maska1, 1, b);
+            int[,,] pixelePoFiltracji3 = FiltrowanieOdczytPixeli(maska2, 1, b);
+            int[,,] pixelePoFiltracji4 = FiltrowanieOdczytPixeli(maska3, 1, b);
+
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji1, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji2, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji3, b);
+            b = FiltrowanieUaktualnienieObrazu(pixelePoFiltracji4, b);
+        }
+
+
+        //filtrowanie na kilku maskach
+        private int[,,] FiltrowanieOdczytPixeli(int[,] maska, int dzielnik, System.Drawing.Bitmap b)
+        {
+            int dlugosc = 1;
+            int[,,] pixelergb = new int[3, b.Width, b.Height];
+            if (b != null)
+            {
+                System.Drawing.Color kolorZm;
+                int[] kolor = new int[3];
+
+                int[,] nowePixeleR = new int[b.Width, b.Height];
+                int[,] nowePixeleG = new int[b.Width, b.Height];
+                int[,] nowePixeleB = new int[b.Width, b.Height];
+                for (int x = dlugosc; x < b.Width - dlugosc; x++)
+                {
+                    for (int y = dlugosc; y < b.Height - dlugosc; y++)
+                    {
+
+                        int[] nowyKolor = new int[3];
+
+                        int a1 = 1, a2 = 1;
+                        for (int i = -1; i <= 1; i++)
+                        {
+                            for (int j = -1; j <= 1; j++)
+                            {
+                                kolorZm = b.GetPixel(x + i, y + j);
+                                nowyKolor[0] += maska[a1 + i, a2 + j] * kolorZm.R;
+                                nowyKolor[1] += maska[a1 + i, a2 + j] * kolorZm.G;
+                                nowyKolor[2] += maska[a1 + i, a2 + j] * kolorZm.B;
+                            }
+                        }
+
+                        nowyKolor[0] /= dzielnik;
+                        nowyKolor[1] /= dzielnik;
+                        nowyKolor[2] /= dzielnik;
+
+                        if (nowyKolor[0] >= 255) nowyKolor[0] = 255;
+                        if (nowyKolor[1] >= 255) nowyKolor[1] = 255;
+                        if (nowyKolor[2] >= 255) nowyKolor[2] = 255;
+
+                        if (nowyKolor[0] <= 0) nowyKolor[0] = 0;
+                        if (nowyKolor[1] <= 0) nowyKolor[1] = 0;
+                        if (nowyKolor[2] <= 0) nowyKolor[2] = 0;
+
+                        nowePixeleR[x, y] = nowyKolor[0];
+                        nowePixeleG[x, y] = nowyKolor[1];
+                        nowePixeleB[x, y] = nowyKolor[2];
+                        pixelergb[0, x, y] = nowyKolor[0];
+                        pixelergb[1, x, y] = nowyKolor[0];
+                        pixelergb[2, x, y] = nowyKolor[0];
+                    }
+                }
+            }
+            return pixelergb;
+        }
+
+        private System.Drawing.Bitmap FiltrowanieUaktualnienieObrazu(int[,,] maska, System.Drawing.Bitmap b)
+        {
+            int dlugosc = 1;
+            if (b != null)
+            {
+                for (int x = dlugosc; x < b.Width - dlugosc; x++)
+                {
+                    for (int y = dlugosc; y < b.Height - dlugosc; y++)
+                    {
+                        b.SetPixel(x, y, System.Drawing.Color.FromArgb(maska[0, x, y], maska[1, x, y], maska[2, x, y]));
+                    }
+                }
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+            return b;
+        }
+
+
+
+        //filtrowanie poprzez jedną maskę
+        private System.Drawing.Bitmap Filtrowanie(int[,] maska, int dzielnik, System.Drawing.Bitmap b)
+        {
+            int dlugosc = 1;
 
             if (b != null)
             {
-                System.Drawing.Color kolorWejsciowy;
                 System.Drawing.Color kolorZm;
                 int[] kolor = new int[3];
                 int[,] nowePixeleR = new int[b.Width, b.Height];
                 int[,] nowePixeleG = new int[b.Width, b.Height];
                 int[,] nowePixeleB = new int[b.Width, b.Height];
-                for (int x = 0 + dlugosc; x < b.Width - dlugosc; x++)
+                for (int x = dlugosc; x < b.Width - dlugosc; x++)
                 {
-                    for (int y = 0 + dlugosc; y < b.Height - dlugosc; y++)
+                    for (int y = dlugosc; y < b.Height - dlugosc; y++)
                     {
-                        kolorWejsciowy = b.GetPixel(x, y);
-                        kolor[0] = kolorWejsciowy.R;
-                        kolor[1] = kolorWejsciowy.G;
-                        kolor[2] = kolorWejsciowy.B;
+
                         int[] nowyKolor = new int[3];
 
-                        for (int i = 0; i < 3; i++)
+                        int a1 = 1, a2 = 1;
+                        for (int i = -1; i <= 1; i++)
                         {
-                            for (int j = 0; j < 3; j++)
+                            for (int j = -1; j <= 1; j++)
                             {
-                                kolorZm = b.GetPixel(x - i, y - j);
-                                nowyKolor[0] += maska[i, j] * kolorZm.R;
-                                nowyKolor[1] += maska[i, j] * kolorZm.G;
-                                nowyKolor[2] += maska[i, j] * kolorZm.B;
+                                kolorZm = b.GetPixel(x + i, y + j);
+                                nowyKolor[0] += maska[a1 + i, a2 + j] * kolorZm.R;
+                                nowyKolor[1] += maska[a1 + i, a2 + j] * kolorZm.G;
+                                nowyKolor[2] += maska[a1 + i, a2 + j] * kolorZm.B;
                             }
                         }
+
+                        nowyKolor[0] /= dzielnik;
+                        nowyKolor[1] /= dzielnik;
+                        nowyKolor[2] /= dzielnik;
 
                         if (nowyKolor[0] >= 255) nowyKolor[0] = 255;
                         if (nowyKolor[1] >= 255) nowyKolor[1] = 255;
@@ -644,9 +790,9 @@ namespace Biometria
                     }
                 }
 
-                for (int x = 0 + dlugosc; x < b.Width - dlugosc; x++)
+                for (int x = dlugosc; x < b.Width - dlugosc; x++)
                 {
-                    for (int y = 0 + dlugosc; y < b.Height - dlugosc; y++)
+                    for (int y = dlugosc; y < b.Height - dlugosc; y++)
                     {
                         b.SetPixel(x, y, System.Drawing.Color.FromArgb(nowePixeleR[x, y], nowePixeleG[x, y], nowePixeleB[x, y]));
                     }
@@ -656,12 +802,274 @@ namespace Biometria
             return b;
         }
 
+        private void FiltrKuwahara(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
 
+            b = FiltrowanieKuwahara(b);
+        }
 
+        private System.Drawing.Bitmap FiltrowanieKuwahara(System.Drawing.Bitmap b)
+        {
+            int dlugoscMaski = 5;
 
+            if (b != null)
+            {
+                int[,] nowePixeleR = new int[b.Width, b.Height];
+                int[,] nowePixeleG = new int[b.Width, b.Height];
+                int[,] nowePixeleB = new int[b.Width, b.Height];
 
+                for (int x = dlugoscMaski / 2; x < b.Width - dlugoscMaski / 2; x++)
+                {
+                    for (int y = dlugoscMaski / 2; y < b.Height - dlugoscMaski / 2; y++)
+                    {
+                        System.Drawing.Color pixel;
 
+                        //region1
+                        int[] srednia1region = new int[3];
+                        int m = 0;
+                        int[,] liczby1 = new int[3, 9];
+                        int[] wariancja1region = new int[3];
+                        for (int k = -2; k <= 0; k++)
+                        {
+                            for (int l = -2; l <= 0; l++)
+                            {
+                                pixel = b.GetPixel(x + k, y + l);
+                                srednia1region[0] += pixel.R;
+                                srednia1region[1] += pixel.G;
+                                srednia1region[2] += pixel.B;
+                                liczby1[0, m] = pixel.R;
+                                liczby1[1, m] = pixel.G;
+                                liczby1[2, m] = pixel.B;
+                                m++;
+                            }
+                        }
+                        srednia1region[0] /= 9;
+                        srednia1region[1] /= 9;
+                        srednia1region[2] /= 9;
+                        int[] z1 = new int[3];
+                        for (int i = 0; i < 9; i++)
+                        {
+                            z1[0] += (srednia1region[0] - liczby1[0, i]) * (srednia1region[0] - liczby1[0, i]);
+                            z1[1] += (srednia1region[1] - liczby1[1, i]) * (srednia1region[1] - liczby1[1, i]);
+                            z1[2] += (srednia1region[2] - liczby1[2, i]) * (srednia1region[2] - liczby1[2, i]);
+                        }
+                        wariancja1region[0] = z1[0] / 9;
+                        wariancja1region[1] = z1[1] / 9;
+                        wariancja1region[2] = z1[2] / 9;
 
+                        //region2
+                        int[] srednia2region = new int[3];
+                        m = 0;
+                        int[,] liczby2 = new int[3, 9];
+                        int[] wariancja2region = new int[3];
+                        for (int k = 0; k <= 2; k++)
+                        {
+                            for (int l = -2; l <= 0; l++)
+                            {
+                                pixel = b.GetPixel(x + k, y + l);
+                                srednia2region[0] += pixel.R;
+                                srednia2region[1] += pixel.G;
+                                srednia2region[2] += pixel.B;
+                                liczby2[0, m] = pixel.R;
+                                liczby2[1, m] = pixel.G;
+                                liczby2[2, m] = pixel.B;
+                                m++;
+                            }
+                        }
+                        srednia2region[0] /= 9;
+                        srednia2region[1] /= 9;
+                        srednia2region[2] /= 9;
+                        int[] z2 = new int[3];
+                        for (int i = 0; i < 9; i++)
+                        {
+                            z2[0] += (srednia2region[0] - liczby2[0, i]) * (srednia2region[0] - liczby2[0, i]);
+                            z2[1] += (srednia2region[1] - liczby2[1, i]) * (srednia2region[1] - liczby2[1, i]);
+                            z2[2] += (srednia2region[2] - liczby2[2, i]) * (srednia2region[2] - liczby2[2, i]);
+                        }
+                        wariancja2region[0] = z2[0] / 9;
+                        wariancja2region[1] = z2[1] / 9;
+                        wariancja2region[2] = z2[2] / 9;
+
+                        //region3
+                        int[] srednia3region = new int[3];
+                        m = 0;
+                        int[,] liczby3 = new int[3, 9];
+                        int[] wariancja3region = new int[3];
+                        for (int k = -2; k <= 0; k++)
+                        {
+                            for (int l = 0; l <= 2; l++)
+                            {
+                                pixel = b.GetPixel(x + k, y + l);
+                                srednia3region[0] += pixel.R;
+                                srednia3region[1] += pixel.G;
+                                srednia3region[2] += pixel.B;
+                                liczby3[0, m] = pixel.R;
+                                liczby3[1, m] = pixel.G;
+                                liczby3[2, m] = pixel.B;
+                                m++;
+                            }
+                        }
+                        srednia3region[0] /= 9;
+                        srednia3region[1] /= 9;
+                        srednia3region[2] /= 9;
+                        int[] z3 = new int[3];
+                        for (int i = 0; i < 9; i++)
+                        {
+                            z3[0] += (srednia3region[0] - liczby3[0, i]) * (srednia3region[0] - liczby3[0, i]);
+                            z3[1] += (srednia3region[1] - liczby3[1, i]) * (srednia3region[1] - liczby3[1, i]);
+                            z3[2] += (srednia3region[2] - liczby3[2, i]) * (srednia3region[2] - liczby3[2, i]);
+                        }
+                        wariancja3region[0] = z3[0] / 9;
+                        wariancja3region[1] = z3[1] / 9;
+                        wariancja3region[2] = z3[2] / 9;
+
+                        //region4
+                        int[] srednia4region = new int[3];
+                        m = 0;
+                        int[,] liczby4 = new int[3, 9];
+                        int[] wariancja4region = new int[3];
+                        for (int k = 0; k <= 2; k++)
+                        {
+                            for (int l = 0; l <= 2; l++)
+                            {
+                                pixel = b.GetPixel(x + k, y + l);
+                                srednia4region[0] += pixel.R;
+                                srednia4region[1] += pixel.G;
+                                srednia4region[2] += pixel.B;
+                                liczby4[0, m] = pixel.R;
+                                liczby4[1, m] = pixel.G;
+                                liczby4[2, m] = pixel.B;
+                                m++;
+                            }
+                        }
+                        srednia4region[0] /= 9;
+                        srednia4region[1] /= 9;
+                        srednia4region[2] /= 9;
+                        int[] z4 = new int[3];
+                        for (int i = 0; i < 9; i++)
+                        {
+                            z4[0] += (srednia4region[0] - liczby4[0, i]) * (srednia4region[0] - liczby4[0, i]);
+                            z4[1] += (srednia4region[1] - liczby4[1, i]) * (srednia4region[1] - liczby4[1, i]);
+                            z4[2] += (srednia4region[2] - liczby4[2, i]) * (srednia4region[2] - liczby4[2, i]);
+                        }
+                        wariancja4region[0] = z4[0] / 9;
+                        wariancja4region[1] = z4[1] / 9;
+                        wariancja4region[2] = z4[2] / 9;
+
+                        int r = 0, g = 0, bb = 0;
+                        int minR = wariancja1region[0];
+                        if (wariancja2region[0] < minR) { minR = wariancja2region[0]; r = 1; }
+                        if (wariancja3region[0] < minR) { minR = wariancja3region[0]; r = 2; }
+                        if (wariancja4region[0] < minR) { minR = wariancja4region[0]; r = 3; }
+
+                        int minG = wariancja1region[1];
+                        if (wariancja2region[1] < minG) { minG = wariancja2region[0]; g = 1; }
+                        if (wariancja3region[1] < minG) { minG = wariancja3region[1]; g = 2; }
+                        if (wariancja4region[1] < minG) { minG = wariancja4region[1]; g = 3; }
+
+                        int minB = wariancja1region[2];
+                        if (wariancja2region[2] < minB) { minB = wariancja2region[2]; bb = 1; }
+                        if (wariancja3region[2] < minB) { minB = wariancja3region[0]; bb = 2; }
+                        if (wariancja4region[2] < minB) { minB = wariancja4region[2]; bb = 3; }
+
+                        if (r == 0) nowePixeleR[x, y] = srednia1region[0];
+                        if (r == 1) nowePixeleR[x, y] = srednia2region[0];
+                        if (r == 2) nowePixeleR[x, y] = srednia3region[0];
+                        if (r == 3) nowePixeleR[x, y] = srednia4region[0];
+
+                        if (g == 0) nowePixeleG[x, y] = srednia1region[1];
+                        if (g == 1) nowePixeleG[x, y] = srednia2region[1];
+                        if (g == 2) nowePixeleG[x, y] = srednia3region[1];
+                        if (g == 3) nowePixeleG[x, y] = srednia4region[1];
+
+                        if (bb == 0) nowePixeleB[x, y] = srednia1region[2];
+                        if (bb == 1) nowePixeleB[x, y] = srednia2region[2];
+                        if (bb == 2) nowePixeleB[x, y] = srednia3region[2];
+                        if (bb == 3) nowePixeleB[x, y] = srednia4region[2];
+
+                    }
+                }
+
+                for (int x = dlugoscMaski / 2; x < b.Width - dlugoscMaski / 2; x++)
+                {
+                    for (int y = dlugoscMaski / 2; y < b.Height - dlugoscMaski / 2; y++)
+                    {
+                        b.SetPixel(x, y, System.Drawing.Color.FromArgb(nowePixeleR[x, y], nowePixeleG[x, y], nowePixeleB[x, y]));
+                    }
+                }
+
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+            return b;
+        }
+
+        private void FiltrMaciezowy3x3(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            b = FiltrowanieMedianowe(3, b);
+        }
+        private void FiltrMaciezowy5x5(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            b = FiltrowanieMedianowe(5, b);
+        }
+        private System.Drawing.Bitmap FiltrowanieMedianowe(int rozmiarMaski, System.Drawing.Bitmap b)
+        {
+            int dlugosc = rozmiarMaski * rozmiarMaski;
+            int pol = rozmiarMaski / 2;
+            if (b != null)
+            {
+                System.Drawing.Color kolorWejsciowy;
+                int[,] nowePixeleR = new int[b.Width, b.Height];
+                int[,] nowePixeleG = new int[b.Width, b.Height];
+                int[,] nowePixeleB = new int[b.Width, b.Height];
+
+                for (int x = 0 + pol; x < b.Width - pol; x++)
+                {
+                    for (int y = 0 + pol; y < b.Height - pol; y++)
+                    {
+                        int[] tableR = new int[dlugosc];
+                        int[] tableG = new int[dlugosc];
+                        int[] tableB = new int[dlugosc];
+                        int o = 0;
+                        for (int i = x - pol; i <= x + pol; i++)
+                        {
+                            for (int j = y - pol; j <= y + pol; j++)
+                            {
+                                kolorWejsciowy = b.GetPixel(i, j);
+                                tableR[o] = kolorWejsciowy.R;
+                                tableG[o] = kolorWejsciowy.G;
+                                tableB[o] = kolorWejsciowy.B;
+                                o++;
+                            }
+                        }
+
+                        Array.Sort(tableR);
+                        Array.Sort(tableG);
+                        Array.Sort(tableB);
+                        int medianValueR = tableR[4];
+                        int medianValueG = tableG[4];
+                        int medianValueB = tableB[4];
+                        nowePixeleR[x, y] = medianValueR;
+                        nowePixeleG[x, y] = medianValueG;
+                        nowePixeleB[x, y] = medianValueB;
+                    }
+                }
+                for (int x = 0 + pol; x < b.Width - pol; x++)
+                {
+                    for (int y = 0 + pol; y < b.Height - pol; y++)
+                    {
+                        b.SetPixel(x, y, System.Drawing.Color.FromArgb(nowePixeleR[x, y], nowePixeleG[x, y], nowePixeleB[x, y]));
+                    }
+                }
+                obrazek.Source = ConvertBitmapImage(b);
+            }
+            return b;
+        }
 
         #endregion
 

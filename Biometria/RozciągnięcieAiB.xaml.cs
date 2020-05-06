@@ -32,14 +32,11 @@ namespace Biometria
 
             this.DialogResult = true;
 
-            if ((!(int.TryParse(txtAnswer1.Text, out a))) && !(int.TryParse(txtAnswer3.Text, out a)))
+            if ((!(int.TryParse(txtAnswer1.Text, out a))) || !(int.TryParse(txtAnswer3.Text, out b)))
             {
                 a = 54;
                 b = 255;
             }
-
-
-
 
         }
         private void Anuluj(object sender, RoutedEventArgs e)
