@@ -1073,7 +1073,7 @@ namespace Biometria
 
         private void ZamkniecieMorfologiczne(object sender, RoutedEventArgs e)
         {
-            BitmapImage source = obrazek_2.Source as BitmapImage;
+            BitmapImage source = obrazek.Source as BitmapImage;
             System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
             morphologicalClosure morphologic = new morphologicalClosure();
             int[,] maska = new int[3, 3] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
