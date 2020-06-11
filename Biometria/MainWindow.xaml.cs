@@ -1051,9 +1051,9 @@ namespace Biometria
                         Array.Sort(tableR);
                         Array.Sort(tableG);
                         Array.Sort(tableB);
-                        int medianValueR = tableR[4];
-                        int medianValueG = tableG[4];
-                        int medianValueB = tableB[4];
+                        int medianValueR = tableR[dlugosc / 2];
+                        int medianValueG = tableG[dlugosc / 2];
+                        int medianValueB = tableB[dlugosc / 2];
                         nowePixeleR[x, y] = medianValueR;
                         nowePixeleG[x, y] = medianValueG;
                         nowePixeleB[x, y] = medianValueB;
@@ -1069,6 +1069,16 @@ namespace Biometria
                 obrazek.Source = ConvertBitmapImage(b);
             }
             return b;
+        }
+
+        private void ZamkniecieMorfologiczne(object sender, RoutedEventArgs e)
+        {
+            BitmapImage source = obrazek_2.Source as BitmapImage;
+            System.Drawing.Bitmap b = BitmapImage2DBitmap(source);
+            morphologicalClosure morphologic = new morphologicalClosure();
+            int[,] maska = new int[3, 3] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
+            b = morphologic.FilterM(maska, b);
+            obrazek.Source = ConvertBitmapImage(b);
         }
 
         #endregion
