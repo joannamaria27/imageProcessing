@@ -60,6 +60,7 @@
                     <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 3x3" Click="FiltrMaciezowy3x3"/>
                     <MenuItem Background="LightGray" Header="_Filtr medianowy dla maski 5x5" Click="FiltrMaciezowy5x5"/>
                 </MenuItem>
+                <MenuItem Background="LightGray" Header="_Zamknięcie morfologiczne" Click="ZamkniecieMorfologiczne"/>
             </Menu>
 
         </DockPanel>
